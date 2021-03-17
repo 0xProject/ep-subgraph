@@ -6,8 +6,8 @@ import { Fill, Maker, Swap, Taker, Token, Transaction } from '../generated/schem
 
 export let WETH_ADDRESS = Address.fromHexString('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2') as Address;
 export let EXCHANGE_PROXY_ADDRESS = Address.fromHexString('0xdef1c0ded9bec7f1a1670819833240f027b25eff') as Address;
-export let SANDBOX_ADDRESS = Address.fromHexString('0x407b4128e9ecad8769b2332312a9f655cb9f5f3a') as Address;
-export let FLASH_WALLET_ADDRESS = Address.fromHexString('0x22f9dcf4647084d6c31b2765f6910cd85c178c18') as Address;
+export let SANDBOX_ADDRESS = Address.fromHexString('0xde7b2747624a647600fdb349184d0448ab954929') as Address;
+export let FLASH_WALLET_ADDRESS = Address.fromHexString('0xdb6f1920a889355780af7570773609bd8cb1f498') as Address;
 
 Math.seedRandom(1337);
 

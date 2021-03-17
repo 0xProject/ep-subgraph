@@ -6,10 +6,10 @@ schema:
 dataSources:
     - kind: ethereum/contract
       name: Transformers
-      network: mainnet
+      network: bsc
       source:
           abi: TransformerEvents
-          startBlock: 11565019
+          startBlock: 5543225
       mapping:
           kind: ethereum/events
           apiVersion: 0.0.4
@@ -35,10 +35,10 @@ dataSources:
           file: ./src/mappings/transformers.ts
     - kind: ethereum/contract
       name: LiquidityProviders
-      network: mainnet
+      network: bsc
       source:
           abi: ILiquidityProvider
-          startBlock: 11565019
+          startBlock: 5543225
       mapping:
           kind: ethereum/events
           apiVersion: 0.0.4
@@ -60,11 +60,11 @@ dataSources:
           file: ./src/mappings/lps.ts
     - kind: ethereum/contract
       name: ExchangeProxy
-      network: mainnet
+      network: bsc
       source:
           address: '0xdef1c0ded9bec7f1a1670819833240f027b25eff'
           abi: IZeroEx
-          startBlock: 11565019
+          startBlock: 5543225
       mapping:
           kind: ethereum/events
           apiVersion: 0.0.4
@@ -103,10 +103,10 @@ dataSources:
           file: ./src/mappings/exchange-proxy.ts
     - kind: ethereum/contract
       name: Uniswap
-      network: mainnet
+      network: bsc
       source:
           abi: UniswapPair
-          startBlock: 11565019
+          startBlock: 5543225
       mapping:
           kind: ethereum/events
           apiVersion: 0.0.4

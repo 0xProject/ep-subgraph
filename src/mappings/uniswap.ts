@@ -4,8 +4,9 @@ import { UniswapPair, Swap } from '../../generated/Uniswap/UniswapPair';
 import { UniswapPairFactory } from '../../generated/Uniswap/UniswapPairFactory';
 import { EXCHANGE_PROXY_ADDRESS, takerFindOrCreate, tokenFindOrCreate, transactionFindOrCreate } from '../utils';
 
-let UNISWAP_V2_FACTORY_ADDRESS = Address.fromHexString('0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f');
-let SUSHISWAP_FACTORY_ADDRESS = Address.fromHexString('0xc0aee478e3658e2610c5f7a4a2e1777ce9e4f2ac');
+let PANCAKESWAP_FACTORY_ADDRESS = Address.fromHexString('0xBCfCcbde45cE874adCB698cC183deBcF17952812');
+let BAKERYSWAP_FACTORY_ADDRESS = Address.fromHexString('0x01bF7C66c6BD861915CdaaE475042d3c4BaE16A7');
+let SUSHISWAP_FACTORY_ADDRESS = Address.fromHexString('0xc35DADB65012eC5796536bD9864eD8773aBc74C4');
 
 export function handleUniswapSwap(event: Swap): void {
     // We're only interested in ones from the EP because those are from
@@ -78,10 +79,12 @@ function getPairInfo(pairAddress: Address): PairInfo {
         return info;
     }
     let pairFactoryAddress = Address.fromHexString(pairFactoryResult.value.toHexString()) as Address;
-    if (pairFactoryAddress == UNISWAP_V2_FACTORY_ADDRESS) {
-        info.source = 'UniswapV2';
+    if (pairFactoryAddress == PANCAKESWAP_FACTORY_ADDRESS) {
+        info.source = 'PancakeSwap';
+    } else if (pairFactoryAddress == BAKERYSWAP_FACTORY_ADDRESS) {
+        info.source = 'BakerySwap';
     } else if (pairFactoryAddress == SUSHISWAP_FACTORY_ADDRESS) {
-        info.source = 'Sushiswap';
+        info.source = 'SushiSwap';
     } else {
         return info;
     }
