@@ -21,6 +21,7 @@ export function handleLiquidityProviderFillEvent(event: LiquidityProviderFill): 
 
     let fill = new Fill(tx.id + '-' + 'LiquidityProviderFill(' + source + ')-' + event.logIndex.toString());
     fill.transaction = tx.id;
+    fill.timestamp = tx.timestamp;
     fill.blockNumber = tx.blockNumber;
     fill.logIndex = event.logIndex;
     fill.source = source;

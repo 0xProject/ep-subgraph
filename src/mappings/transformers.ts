@@ -22,6 +22,7 @@ export function handleLegacyBridgeFillEvent(event: BridgeFill): void {
 
     let fill = new Fill(tx.id + '-' + 'LegacyBridgeFill(' + source + ')-' + event.logIndex.toString());
     fill.transaction = tx.id;
+    fill.timestamp = tx.timestamp;
     fill.blockNumber = tx.blockNumber;
     fill.logIndex = event.logIndex;
     fill.source = source;
@@ -56,6 +57,7 @@ export function handleBridgeFillEvent(event: BridgeFill1): void {
 
     let fill = new Fill(tx.id + '-' + 'BridgeFill(' + source + ')-' + event.logIndex.toString());
     fill.transaction = tx.id;
+    fill.timestamp = tx.timestamp;
     fill.blockNumber = tx.blockNumber;
     fill.logIndex = event.logIndex;
     fill.source = source;
@@ -90,6 +92,7 @@ export function handleERC20BridgeTransferEvent(event: ERC20BridgeTransfer): void
 
     let fill = new Fill(tx.id + '-' + 'ERC20BridgeTransfer(' + source + ')-' + event.logIndex.toString());
     fill.transaction = tx.id;
+    fill.timestamp = tx.timestamp;
     fill.blockNumber = tx.blockNumber;
     fill.logIndex = event.logIndex;
     fill.source = source;

@@ -41,6 +41,7 @@ export function handleUniswapSwap(event: Swap): void {
     let fill = new Fill(tx.id + '-' + info.source + '-' + event.logIndex.toString());
     fill.blockNumber = tx.blockNumber;
     fill.transaction = tx.id;
+    fill.timestamp = tx.timestamp;
     fill.logIndex = event.logIndex;
     fill.source = info.source;
     fill.recipient = Address.fromHexString(taker.id) as Bytes;

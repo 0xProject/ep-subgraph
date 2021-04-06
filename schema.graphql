@@ -52,6 +52,7 @@ type Fill @entity {
     # tx hash - source - log index
     id: ID!
     blockNumber: BigInt!
+    timestamp: BigInt!
     transaction: Transaction!
     logIndex: BigInt
     source: String!
@@ -71,6 +72,7 @@ type NativeOrderFill @entity {
     # tx hash - order hash - log index
     id: ID!
     transaction: Transaction!
+    timestamp: BigInt!
     blockNumber: BigInt!
     type: NativeOrderType!
     orderHash: Bytes!
@@ -89,6 +91,7 @@ type Swap @entity {
     id: ID!
     blockNumber: BigInt!
     transaction: Transaction!
+    timestamp: BigInt!
     logIndex: BigInt
     method: SwapMethod!
     fills: [Fill!]!
