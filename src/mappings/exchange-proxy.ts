@@ -1,10 +1,13 @@
-import { BigInt, Bytes, log } from '@graphprotocol/graph-ts';
+import { Address, BigInt, Bytes, log } from '@graphprotocol/graph-ts';
 import {
     BatchFillCall,
     LimitOrderFilled,
     LiquidityProviderSwap,
     MultiHopFillCall,
     RfqOrderFilled,
+    SellEthForTokenToUniswapV3Call,
+    SellTokenForEthToUniswapV3Call,
+    SellTokenForTokenToUniswapV3Call,
     SellToUniswapCall,
     TransformedERC20
 } from '../../generated/ExchangeProxy/IZeroEx';
@@ -304,6 +307,175 @@ export function handleSellToUniswapCall(call: SellToUniswapCall): void {
     }
 }
 
+export function handleSellEthForTokenToUniswapV3(call: SellEthForTokenToUniswapV3Call): void {
+    log.debug('found sellEthForTokenToUniswapV3 swap in tx {}', [call.transaction.hash.toHex()]);
+
+    let tokenPath = decodeUniswapV3TokenPath(call.inputs.encodedPath);
+    if (tokenPath.length < 2) {
+        return;
+    }
+
+    let tx = transactionFindOrCreate(call.transaction.hash, call.block);
+    let fills = findSellToUniswapV3EventFills(tx, tokenPath);
+    if (fills.length === 0) {
+        // If no fills were found, the TX reverted.
+        return;
+    }
+    let taker = takerFindOrCreate(call.from);
+
+    // HACK: Currently call.value is not exposed and there is no `sellAmount` parameter
+    // for this function so for direct from EOA calls we can use `transaction.value`
+    // but for others we guess it by taking the inputTokenAmount from the first
+    // fill we found.
+    let inputAmount = call.transaction.value;
+    if (call.from != call.transaction.from) {
+        inputAmount = fills[0].inputTokenAmount;
+    }
+
+    let inputToken = tokenFindOrCreate(tokenPath[0]);
+    let outputToken = tokenFindOrCreate(tokenPath[tokenPath.length - 1]);
+    inputToken.swapVolume = inputToken.swapVolume.plus(inputAmount);
+    outputToken.swapVolume = outputToken.swapVolume.plus(call.outputs.buyAmount);
+    inputToken.save();
+    outputToken.save();
+
+    let r = getRandomNumber();
+    let swap = new Swap(tx.id + '-' + r.toString());
+    swap.transaction = tx.id;
+    swap.timestamp = tx.timestamp;
+    swap.blockNumber = tx.blockNumber;
+    swap.method = 'Uniswap3VIP';
+    swap.fills = fillsToIds(fills);
+    swap.inputToken = inputToken.id;
+    swap.outputToken = outputToken.id;
+    // HACK: No call.value exposed so we incorrectly use transaction.value.
+    swap.inputTokenAmount = inputAmount;
+    swap.outputTokenAmount = call.outputs.buyAmount;
+    swap.taker = taker.id;
+    swap.save();
+
+    {
+        taker.swapCount = taker.swapCount.plus(BigInt.fromI32(1));
+        taker.save();
+    }
+
+    {
+        tx.lastSwap = swap.id;
+        tx.save();
+    }
+}
+
+export function handleSellTokenForEthToUniswapV3(call: SellTokenForEthToUniswapV3Call): void {
+    log.debug('found sellTokenForEthToUniswapV3 swap in tx {}', [call.transaction.hash.toHex()]);
+
+    let tokenPath = decodeUniswapV3TokenPath(call.inputs.encodedPath);
+    if (tokenPath.length < 2) {
+        return;
+    }
+
+    let tx = transactionFindOrCreate(call.transaction.hash, call.block);
+    let fills = findSellToUniswapV3EventFills(tx, tokenPath);
+    if (fills.length === 0) {
+        // If no fills were found, the TX reverted.
+        return;
+    }
+    let taker = takerFindOrCreate(call.from);
+
+    let inputToken = tokenFindOrCreate(tokenPath[0]);
+    let outputToken = tokenFindOrCreate(tokenPath[tokenPath.length - 1]);
+    inputToken.swapVolume = inputToken.swapVolume.plus(call.inputs.sellAmount);
+    outputToken.swapVolume = outputToken.swapVolume.plus(call.outputs.buyAmount);
+    inputToken.save();
+    outputToken.save();
+
+    let r = getRandomNumber();
+    let swap = new Swap(tx.id + '-' + r.toString());
+    swap.transaction = tx.id;
+    swap.timestamp = tx.timestamp;
+    swap.blockNumber = tx.blockNumber;
+    swap.method = 'Uniswap3VIP';
+    swap.fills = fillsToIds(fills);
+    swap.inputToken = inputToken.id;
+    swap.outputToken = outputToken.id;
+    swap.inputTokenAmount = call.inputs.sellAmount;
+    swap.outputTokenAmount = call.outputs.buyAmount;
+    swap.taker = taker.id;
+    swap.save();
+
+    {
+        taker.swapCount = taker.swapCount.plus(BigInt.fromI32(1));
+        taker.save();
+    }
+
+    {
+        tx.lastSwap = swap.id;
+        tx.save();
+    }
+}
+
+export function handleSellTokenForTokenToUniswapV3(call: SellTokenForTokenToUniswapV3Call): void {
+    log.debug('found sellTokenForTokenToUniswapV3 swap in tx {}', [call.transaction.hash.toHex()]);
+
+    let tokenPath = decodeUniswapV3TokenPath(call.inputs.encodedPath);
+    if (tokenPath.length < 2) {
+        return;
+    }
+
+    let tx = transactionFindOrCreate(call.transaction.hash, call.block);
+    let fills = findSellToUniswapV3EventFills(tx, tokenPath);
+    if (fills.length === 0) {
+        // If no fills were found, the TX reverted.
+        return;
+    }
+    let taker = takerFindOrCreate(call.from);
+
+    let inputToken = tokenFindOrCreate(tokenPath[0]);
+    let outputToken = tokenFindOrCreate(tokenPath[tokenPath.length - 1]);
+    inputToken.swapVolume = inputToken.swapVolume.plus(call.inputs.sellAmount);
+    outputToken.swapVolume = outputToken.swapVolume.plus(call.outputs.buyAmount);
+    inputToken.save();
+    outputToken.save();
+
+    let r = getRandomNumber();
+    let swap = new Swap(tx.id + '-' + r.toString());
+    swap.transaction = tx.id;
+    swap.timestamp = tx.timestamp;
+    swap.blockNumber = tx.blockNumber;
+    swap.method = 'Uniswap3VIP';
+    swap.fills = fillsToIds(fills);
+    swap.inputToken = inputToken.id;
+    swap.outputToken = outputToken.id;
+    swap.inputTokenAmount = call.inputs.sellAmount;
+    swap.outputTokenAmount = call.outputs.buyAmount;
+    swap.taker = taker.id;
+    swap.save();
+
+    {
+        taker.swapCount = taker.swapCount.plus(BigInt.fromI32(1));
+        taker.save();
+    }
+
+    {
+        tx.lastSwap = swap.id;
+        tx.save();
+    }
+}
+
+function decodeUniswapV3TokenPath(encoded: Bytes): Address[] {
+    // UniswapV3 paths are packed encoded as (address(token0), uint24(fee), address(token1), [...])
+    if (encoded.length < 20 + 3 + 20) {
+        // Must be at least one hop.
+        return [];
+    }
+    let o = 0;
+    let tokens = [] as Address[];
+    while (encoded.length - o >= 20) {
+        tokens.push(encoded.subarray(o, o + 20) as Address );
+        o += 23; // Skip the token we just read + fee.
+    }
+    return tokens;
+}
+
 export function handleBatchFillCall(call: BatchFillCall): void {
     log.debug('found batchFill swap in tx {}', [call.transaction.hash.toHex()]);
     let taker = takerFindOrCreate(call.from);
@@ -472,6 +644,46 @@ function findSellToUniswapEventFills(tx: Transaction, call: SellToUniswapCall): 
     }
     // Oh well. 🤷
     log.warning('could not find {} VIP fills for tx {}', [source, tx.id]);
+    return [];
+}
+
+function findSellToUniswapV3EventFills(tx: Transaction, tokenPath: Address[]): Fill[] {
+    if (tokenPath.length < 2) {
+        return [];
+    }
+    let inputToken = normalizeTokenAddress(tokenPath[0]).toHexString();
+    let outputToken = normalizeTokenAddress(tokenPath[tokenPath.length - 1]).toHexString();
+    // First grab all fills for the correct DEX that come from the EP.
+    let fills = [] as Fill[];
+    {
+        let _fills = findSwapEventFills(tx);
+        for (let i = 0; i < _fills.length; ++i) {
+            let f = _fills[i];
+            if (f.source == 'UniswapV3' && f.sender == EXCHANGE_PROXY_ADDRESS) {
+                fills.push(f);
+            }
+        }
+    }
+    // Look for a single fill selling the input token amd buying the output token.
+    for (let i = 0; i < fills.length; ++i) {
+        let f = fills[i];
+        if (f.inputToken == inputToken && f.outputToken == outputToken) {
+            return [f];
+        }
+    }
+    // Couldn't find a single A->B fill. Maybe it's a multi-hop. Try to find
+    // the A->X and X->B fills and grab everything inbetween.
+    for (let i = 0; i < fills.length - 1; ++i) {
+        if (fills[i].inputToken == inputToken) {
+            for (let j = i + 1; j < fills.length; ++j) {
+                if (fills[j].outputToken == outputToken) {
+                    return fills.slice(i, j + 1);
+                }
+            }
+        }
+    }
+    // Oh well. 🤷
+    log.warning('could not find {} VIP fills for tx {} ({} -> {})', ['UniswapV3', tx.id, inputToken, outputToken]);
     return [];
 }
 

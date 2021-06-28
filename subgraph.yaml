@@ -100,6 +100,12 @@ dataSources:
                 handler: handleMultiHopFillCall
               - function: sellToUniswap(address[],uint256,uint256,bool)
                 handler: handleSellToUniswapCall
+              - function: sellEthForTokenToUniswapV3(bytes,uint256,address)
+                handler: handleSellEthForTokenToUniswapV3
+              - function: sellTokenForEthToUniswapV3(bytes,uint256,uint256,address)
+                handler: handleSellTokenForEthToUniswapV3
+              - function: sellTokenForTokenToUniswapV3(bytes,uint256,uint256,address)
+                handler: handleSellTokenForTokenToUniswapV3
           file: ./src/mappings/exchange-proxy.ts
     - kind: ethereum/contract
       name: Uniswap
@@ -129,3 +135,31 @@ dataSources:
               - event: Swap(indexed address,uint256,uint256,uint256,uint256,indexed address)
                 handler: handleUniswapSwap
           file: ./src/mappings/uniswap.ts
+    - kind: ethereum/contract
+      name: UniswapV3
+      network: mainnet
+      source:
+          abi: UniswapV3Pool
+          startBlock: 12369621
+      mapping:
+          kind: ethereum/events
+          apiVersion: 0.0.4
+          language: wasm/assemblyscript
+          entities:
+              - Fill
+              - Token
+              - Transaction
+              - Taker
+          abis:
+              - name: UniswapV3Pool
+                file: ./abis/UniswapV3Pool.json
+              - name: UniswapV3Factory
+                file: ./abis/UniswapV3Factory.json
+              - name: ERC20
+                file: ./abis/ERC20.json
+              - name: ERC20SymbolBytes
+                file: ./abis/ERC20SymbolBytes.json
+          eventHandlers:
+              - event: Swap(indexed address,indexed address,int256,int256,uint160,uint128,int24)
+                handler: handleUniswapV3Swap
+          file: ./src/mappings/uniswapv3.ts
